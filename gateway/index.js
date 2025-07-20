@@ -1,25 +1,15 @@
-const EG = require('express-gateway');
+
+  
 const express = require('express');
-
+require('dotenv').config();
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+app.use(express.json());
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'gateway' });
+  res.status(200).send({ status: 'ok', service: 'gateway-service' });
 });
 
-// Spuštění Express Gateway
-EG()
-  .load()
-  .run()
-  .then(() => {
-    console.log('Express Gateway is running');
-    app.listen(port, () => {
-      console.log(`Gateway HTTP server listening on port ${port}`);
-    });
-  })
-  .catch(err => {
-    console.error('Failed to start Express Gateway', err);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`${PORT} - gateway-service running`);
+});
