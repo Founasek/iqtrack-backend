@@ -1,25 +1,27 @@
-module.exports = {
-  http: {
-    port: process.env.PORT || 3000
-  },
-  apiEndpoints: {
-    login: {
-      path: '/login',
-      target: 'auth-service',
-      method: 'POST'
-    },
-    users: {
-      path: '/users',
-      target: 'user-service',
-      method: 'GET'
-    }
-  },
-  services: {
-    'auth-service': {
-      url: 'http://localhost:4001'
-    },
-    'user-service': {
-      url: 'http://localhost:4002'
-    }
-  }
-};
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const express = require('express');
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+// Proxy pravidla
+app.use('/auth', createProxyMiddleware({
+  target: 'http://auth-service:4001',
+  changeOrigin: true,
+  pathRewrite: { '^/auth': '' }
+}));
+
+app.use('/user', createProxyMiddleware({
+  target: 'http://user-service:4002',
+  changeOrigin: true,
+  pathRewrite: { '^/user': '' }
+}));
+
+// Základní health endpoint gateway
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'gateway-service' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Gateway running on port ${PORT}`);
+});
